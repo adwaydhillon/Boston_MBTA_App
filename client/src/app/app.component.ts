@@ -105,8 +105,9 @@ export class AppComponent {
         console.log(this.routeToStopsDict); 
         console.log(this.maxStopRoute);
         console.log(this.minStopRoute);
-        this.stopToRoutesDict = this.findRoutesForEachStop(this.subwayRoutes, this.routeToStopsDict);
+        this.findRoutesForEachStop(this.subwayRoutes, this.routeToStopsDict);
         this.findStopsWithMultipleRoutes();  
+        this.findRoutesBetweenTwoStops('place-davis', 'place-knncl');
       }, 1000);
   }
 
@@ -126,7 +127,7 @@ export class AppComponent {
         }
       }
     }
-    return stopToRoutesDict;
+    this.stopToRoutesDict = stopToRoutesDict;
   }
 
   //NEED NAMES NOT IDS
@@ -143,6 +144,25 @@ export class AppComponent {
     }
     console.log(stopsWithMultipleRoutesDict); 
     return stopsWithMultipleRoutesDict;
+  }
+
+  private findRoutesBetweenTwoStops(stopA: string, stopB: string) {
+    let stopToRoutesDict = this.stopToRoutesDict,
+        routesBetweenAandB = [];
+
+    if (!stopToRoutesDict.get(stopA) || !stopToRoutesDict.get(stopB)) {
+      console.log("not found");
+      return routesBetweenAandB;
+    }
+    
+    for (let routeA of stopToRoutesDict.get(stopA)) {
+      for (let routeB of stopToRoutesDict.get(stopB)) {
+        if (routeA === routeB) {
+          routesBetweenAandB.push(routeA);
+        }
+      }
+    }
+    console.log(routesBetweenAandB);
   }
 
   private setRouteFilters(routeFilters: Map<any, any>) {
