@@ -12,6 +12,7 @@ export class AppComponent {
   stopFilters: Map<any, any>;
   subwayRoutes: Map<string, string>;
   routeToStopsDict: Map<any, any>;
+  stopToRoutesDict: Map<any, []>;
   maxStopRoute: any;
   minStopRoute: any;
   
@@ -22,6 +23,7 @@ export class AppComponent {
     this.stopFilters = new Map();
     this.routeToStopsDict = new Map();
     this.subwayRoutes = new Map();
+    this.stopToRoutesDict = new Map();
     this.maxStopRoute = {};
     this.minStopRoute = {};
   }
@@ -97,9 +99,15 @@ export class AppComponent {
           };
         }
         this.routeToStopsDict.set(subwayRoute, data);
-        console.log(this.routeToStopsDict.values());
       });
     }
+    setTimeout((data) => { 
+        console.log(this.routeToStopsDict); 
+        console.log(this.maxStopRoute);
+        console.log(this.minStopRoute);
+        this.stopToRoutesDict = this.findRoutesForEachStop(this.subwayRoutes, this.routeToStopsDict);
+        this.findStopsWithMultipleRoutes();  
+      }, 1000);
   }
 
   private findRoutesForEachStop(subwayRoutes: Map<string, string>, routeToStopsDict: Map<string, string>) {
@@ -118,7 +126,23 @@ export class AppComponent {
         }
       }
     }
-    console.log(stopToRoutesDict);
+    return stopToRoutesDict;
+  }
+
+  //NEED NAMES NOT IDS
+  private findStopsWithMultipleRoutes() {
+    let stopToRoutesDict = this.stopToRoutesDict,
+        stopsWithMultipleRoutesDict = [];
+    for (let stop of Array.from(stopToRoutesDict.keys())) {
+      if (stopToRoutesDict.get(stop).length > 1) {
+        stopsWithMultipleRoutesDict.push({
+          stop: stop,
+          routes: stopToRoutesDict.get(stop)
+        });
+      }
+    }
+    console.log(stopsWithMultipleRoutesDict); 
+    return stopsWithMultipleRoutesDict;
   }
 
   private setRouteFilters(routeFilters: Map<any, any>) {
@@ -127,11 +151,5 @@ export class AppComponent {
 
   private setStopFilters(stopFilters: Map<any, any>) {
     this.stopFilters = stopFilters;
-  }
-
-  private async asyncForEach(array, callback) {
-    for (let index = 0; index < array.length; index++) {
-      await callback(array[index], index, array);
-    }
   }
 }
