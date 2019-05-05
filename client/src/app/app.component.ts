@@ -18,6 +18,7 @@ export class AppComponent {
   maxStopRoute: any;
   minStopRoute: any;
   stopsWithMultipleRoutesDict: any;
+  adjacencyMatrix: Map<any, any>;
 
   showSubwayRoutes: boolean;
   showStopsInfoFlag: boolean;
@@ -39,6 +40,7 @@ export class AppComponent {
     this.showSubwayRoutes = false;
     this.showStopsInfoFlag = false;
     this.stopsWithMultipleRoutesDict = [];
+    this.adjacencyMatrix = new Map();
   }
 
   ngOnInit() {
@@ -69,10 +71,6 @@ export class AppComponent {
   setShowStopsInfoFlag() {
     this.showStopsInfoFlag = true;
   }
-
-  // dummy() {
-  //   console.log(this.fromName);
-  // }
 
   // FOR PROBLEM 2; Filter the request for each of the aforementioned subway routes
   getStopInfo() {
@@ -248,6 +246,7 @@ export class AppComponent {
         }
       }
     }
+    this.adjacencyMatrix = adjacencyMatrix;
     console.log(adjacencyMatrix);
   }
 

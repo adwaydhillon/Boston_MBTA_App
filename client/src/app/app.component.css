@@ -5,6 +5,13 @@
     background-color: #bfbfbf;
 }
 
+.form-inline {
+    padding-top: 2%;
+    display: flex;
+    justify-content: center;
+    background-color: #bfbfbf;
+}
+
 .btn {
     padding: 2.5rem 10rem !important;
   }

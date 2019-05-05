@@ -10,18 +10,19 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
-  <div class="buttons">
-    <button type="button" class="btn btn-success" (click)="setShowSubwayRoutesFlag(); makeRouteRequest()">All Subway Routes</button>
-    <button type="button" class="btn btn-info" (click)="setShowStopsInfoFlag(); getStopInfo()">Get Stop Info</button>
-    <form class="form-inline" >
+
+  <form class="form-inline">
       <div class="form-group">
         <input type="search" class="form-control" id="from" placeholder="Enter Origin" name="from">
       </div>
       <div class="form-group">
         <input type="search" class="form-control" id="to" placeholder="Enter Destination" name="to">
       </div>
-      
     </form>
+
+  <div class="buttons">
+    <button type="button" class="btn btn-success" (click)="setShowSubwayRoutesFlag(); makeRouteRequest()">All Subway Routes</button>
+    <button type="button" class="btn btn-info" (click)="setShowStopsInfoFlag(); getStopInfo()">Get Stop Info</button>
     <button type="button" class="btn btn-primary" (click)="getRouteBetweenTwoStops()">Plan a Trip</button>
   </div>
 
