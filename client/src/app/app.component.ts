@@ -202,6 +202,8 @@ export class AppComponent {
   }
 
   private findDirectRoutesBetweenTwoStops(stopA: string, stopB: string) {
+    if (stopA === stopB) return null;
+
     let stopToRoutesDict = this.stopToRoutesDict,
         stops = this.stops,
         stop_names = Array.from(stops.values()),
@@ -230,6 +232,7 @@ export class AppComponent {
   private constructAdjacencyMatrix(stops: Map<string, string>) {
     let adjacencyMatrix = new Map<any, any>(),
         stopNames = Array.from(stops.values());
+
     for (let stopNameA of stopNames) {
       for (let stopNameB of stopNames) {
         let retObj = this.findDirectRoutesBetweenTwoStops(stopNameA, stopNameB);
@@ -248,6 +251,55 @@ export class AppComponent {
     }
     this.adjacencyMatrix = adjacencyMatrix;
     console.log(adjacencyMatrix);
+    console.log(this.adjacencyMatrix.get("Ashmont"));
+    this.getPathDFS("Ashmont", "Chinatown");
+  }
+
+  private getPathDFS(stopA: string, stopB: string) {
+    let source = stopA, 
+        dest = stopB,
+        visitedSet = new Set(),
+        path = new Set();
+
+    this.getPathDFSHelper(source, dest, visitedSet, path);
+    console.log(path);
+  }
+
+  private getPathDFSHelper(source: string, dest: string, visitedSet: Set<any>, path: Set<any>) {
+    console.log("source is");
+    console.log(source);
+
+    console.log("destination is");
+    console.log(dest);
+    console.log("path is");
+    console.log(path);
+    
+    if (visitedSet.has(source)) {
+      return false;
+    }
+
+    visitedSet.add(source);
+    if (source === dest) {
+      return true;
+    }
+
+    for (let child of this.adjacencyMatrix.get(source)) {
+      if (this.getPathDFSHelper(child.neighbor, dest, visitedSet, path)) {
+        path.add(child.path);
+      }
+    }
+    return false;
+  }
+
+  private getSourceIndexInAdjacencyMatrix(source: string) {
+    let count = 0;
+    for (let stop of Array.from(this.adjacencyMatrix.keys())) {
+      if (stop === source) {
+        console.log(count);
+        return count;
+      }
+      count++;
+    }
   }
 
   private getStopIdByName(stops: Map<string, string>, stop_name: string) {
