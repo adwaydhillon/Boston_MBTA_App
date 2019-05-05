@@ -1,4 +1,5 @@
 .buttons {
+    padding-top: 10%;
     display: flex;
     justify-content: space-around;
     background-color: #bfbfbf;
@@ -8,6 +9,18 @@
     padding: 2.5rem 6rem !important;
   }
 
-  .header {
+.header {
     background-color: #bfbfbf;
-  }
+}
+
+.answer {
+    padding-top: 5%;
+    width: 50%;
+    float: center;
+    display: flex;
+    justify-content: space-around;
+    background-color: #bfbfbf;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

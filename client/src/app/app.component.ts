@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { AppService } from './app.service';
 
 @Component({
@@ -17,6 +17,11 @@ export class AppComponent {
   stopToRoutesDict: Map<any, []>;
   maxStopRoute: any;
   minStopRoute: any;
+  stopsWithMultipleRoutesDict: any;
+
+  showSubwayRoutes: boolean;
+  showStopsInfoFlag: boolean;
+  @ViewChild('answerDiv') answerDiv: ElementRef;
   
 
   constructor(public appService: AppService) {
@@ -29,6 +34,9 @@ export class AppComponent {
     this.stopToRoutesDict = new Map();
     this.maxStopRoute = {};
     this.minStopRoute = {};
+    this.showSubwayRoutes = false;
+    this.showStopsInfoFlag = false;
+    this.stopsWithMultipleRoutesDict = [];
   }
 
   ngOnInit() {
@@ -41,30 +49,52 @@ export class AppComponent {
     this.setRouteFilters(routeFilters);
     this.getRoutes()
     .then((data) => {
-      console.log(data.values());
+      if (this.showSubwayRoutes) {
+        let ans_str = '';
+        for (let route of Array.from(data.values())) {
+          ans_str += route + ', '
+        }
+        ans_str = ans_str.substring(0, ans_str.length - 2);
+        this.answerDiv.nativeElement.innerHTML = '<textarea class="form-control" rows="15" type="text" placeholder="' + ans_str + '" readonly>';
+      }
     });
+  }
+
+  setShowSubwayRoutesFlag() {
+    this.showSubwayRoutes = true;
+  }
+
+  setShowStopsInfoFlag() {
+    this.showStopsInfoFlag = true;
   }
 
   // FOR PROBLEM 2; Filter the request for each of the aforementioned subway routes
   getStopInfo() {
     if (this.subwayRoutes.size == 0) {
-      console.log("aaaaa");
       let routeFilters = new Map();
       routeFilters.set('type', [0,1]);
       this.setRouteFilters(routeFilters);
-      return this.getRoutes()
+      this.getRoutes()
         .then((data) => {
-          this.findStopsForEachRoute(data)
+          this.findStopsForEachRoute(this.subwayRoutes);
         });
     }
     else {
       this.findStopsForEachRoute(this.subwayRoutes);
     }
-    setTimeout((data) => { 
-      console.log(this.maxStopRoute);
-      console.log(this.minStopRoute);
+    setTimeout((data) => {
       this.findRoutesForEachStop(this.subwayRoutes, this.routeToStopsDict);
       this.findStopsWithMultipleRoutes();
+      if (this.showStopsInfoFlag) {
+        let ans_str = '';
+        ans_str += this.maxStopRoute.route + ' has the most number (' + this.maxStopRoute.count + ') of stops. ' + this.minStopRoute.route + ' has the least number (' + this.minStopRoute.count + ') of stops.\n'
+        ans_str +=  '\nThe stops connecting multiple routes are:\n';
+
+        for (let l of this.stopsWithMultipleRoutesDict) {
+          ans_str += l.stop + ': ' + l.routes + '\n';
+        }
+        this.answerDiv.nativeElement.innerHTML = '<textarea class="form-control" rows="15" type="text" placeholder="' + ans_str + '" readonly>';
+      }
     }, 1000);
   }
 
@@ -158,13 +188,12 @@ export class AppComponent {
     for (let stop of Array.from(stopToRoutesDict.keys())) {
       if (stopToRoutesDict.get(stop).length > 1) {
         stopsWithMultipleRoutesDict.push({
-          stop: stop,
+          stop: this.stops.get(stop),
           routes: stopToRoutesDict.get(stop)
         });
       }
     }
-    console.log(stopsWithMultipleRoutesDict); 
-    return stopsWithMultipleRoutesDict;
+    this.stopsWithMultipleRoutesDict = stopsWithMultipleRoutesDict;
   }
 
   private findRoutesBetweenTwoStops(stopA: string, stopB: string) {
