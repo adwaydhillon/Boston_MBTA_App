@@ -58,7 +58,7 @@ export class AppComponent {
         for (let route of Array.from(data.values())) {
           ans_str += route + ', '
         }
-        ans_str = ans_str.substring(0, ans_str.length - 2);
+        ans_str = 'All the subway routes in the metro Boston area are:\n\n' + ans_str.substring(0, ans_str.length - 2);
         this.answerDiv.nativeElement.innerHTML = '<textarea class="form-control" rows="15" type="text" placeholder="' + ans_str + '" readonly>';
       }
     });
