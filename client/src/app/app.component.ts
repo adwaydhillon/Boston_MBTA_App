@@ -64,10 +64,14 @@ export class AppComponent {
     });
   }
 
+  // Just to make sure the user intentionally wanted to show this information on the screen. 
+  // Gets kicked off only when the first button is explicitly clicked
   setShowSubwayRoutesFlag() {
     this.showSubwayRoutes = true;
   }
 
+  // Just to make sure the user intentionally wanted to show this information on the screen.
+  // Gets kicked off only when the first button is explicitly clicked
   setShowStopsInfoFlag() {
     this.showStopsInfoFlag = true;
   }
@@ -76,6 +80,7 @@ export class AppComponent {
   getStopInfo() {
     this.showSubwayRoutes = false;
 
+    //This case would be hit if the user directly hits the 'Get Stop Info' button in the first go
     if (this.subwayRoutes.size == 0) {
       let routeFilters = new Map();
       routeFilters.set('type', [0,1]);
@@ -85,6 +90,7 @@ export class AppComponent {
           this.findStopsForEachRoute(this.subwayRoutes);
         });
     }
+    //If the first button has been clicked previously in this session, then this clause evades unnecessary REST calls
     else {
       this.findStopsForEachRoute(this.subwayRoutes);
     }
@@ -110,21 +116,22 @@ export class AppComponent {
   // from the source stop to the destination stop. I have used a Depth First Graph Search algorithm here."
 
   getRouteBetweenTwoStops(from: string, to: string) {
-
     this.showSubwayRoutes = false;
     this.showStopsInfoFlag = false;
 
+    // This case would be hit if the user directly hits the 'Plan a Trip' button in the first go. 
+    // Again, if the second button has been clicked previously in this session, then this clause saves unnecessary REST calls
     if (this.routeToStopsDict.size == 0) {
       this.getStopInfo();
     }
     setTimeout((data) => {
-      //Checking for invalid stop names
       let stop_names = Array.from(this.stops.values());
+      //Checking for invalid origin stop name
       if (stop_names.indexOf(from) < 0) {
         this.answerDiv.nativeElement.innerHTML = '<textarea class="form-control" rows="15" type="text" placeholder="Invalid origin name" readonly>';
         return;
       }
-
+      //Checking for invalid destination stop name
       if (stop_names.indexOf(to) < 0) {
         this.answerDiv.nativeElement.innerHTML = '<textarea class="form-control" rows="15" type="text" placeholder="Invalid destination name" readonly>';
         return;
@@ -136,6 +143,7 @@ export class AppComponent {
     }, 2000);
   }
 
+  // Replace the HTML content of the text field on the UI. Only front ent functionality here 
   private showTheTripRoute(trip: any) {
     let ans_str = '';
     for (let i = 0; i < trip[0].length; i++) {
@@ -145,6 +153,7 @@ export class AppComponent {
     this.answerDiv.nativeElement.innerHTML = '<textarea class="form-control" rows="15" type="text" placeholder="' + ans_str + '" readonly>';
   }
 
+  // Makes the GET call to the app service
   private getRoutes() {
       return this.appService.getRoutes(this.routeFilters)
       .then((data) => {
@@ -155,6 +164,7 @@ export class AppComponent {
       });
     }
 
+  // Makes the GET call to the app service
   private getStops() {
     return this.appService.getStops(this.stopFilters)
     .then((data) => {
@@ -167,6 +177,8 @@ export class AppComponent {
     });
   }
 
+  // Maps every route to all the stops it goes through in the routeToStopsDict object. 
+  // Also keeps a count of the route with the most and the least number of stops
   private findStopsForEachRoute(subwayRoutes: Map<string, string>) {
     let maxStops = Number.MIN_SAFE_INTEGER, 
         minStops = Number.MAX_SAFE_INTEGER;
@@ -196,6 +208,7 @@ export class AppComponent {
     }
   }
 
+  // Maps every stop to all the routes that go through it in the stopToRoutesDict object.
   private findRoutesForEachStop(subwayRoutes: Map<string, string>, routeToStopsDict: Map<string, string>) {
     let stopToRoutesDict;
     stopToRoutesDict = new Map<any, []>();
@@ -215,6 +228,7 @@ export class AppComponent {
     this.stopToRoutesDict = stopToRoutesDict;
   }
 
+  // Saves the stops with 2 or more routes in the stopsWithMultipleRoutesDict object.
   private findStopsWithMultipleRoutes() {
     let stopToRoutesDict = this.stopToRoutesDict,
         stopsWithMultipleRoutesDict = [];
@@ -229,6 +243,8 @@ export class AppComponent {
     this.stopsWithMultipleRoutesDict = stopsWithMultipleRoutesDict;
   }
 
+  // This method is used in the construction of the Adjacency Matrix, since it returns the SINGULAR route 
+  // between two stops (if one exists); else returns a null
   private findDirectRoutesBetweenTwoStops(stopA: string, stopB: string) {
     if (stopA === stopB) return null;
 
@@ -257,6 +273,7 @@ export class AppComponent {
     return null;
   }
 
+  // Constructs an adjacency matrix; Each stop is mapped to all stops one can get to from it using just one train line. It also stores the line name 
   private constructAdjacencyMatrix(stops: Map<string, string>) {
     let adjacencyMatrix = new Map<any, any>(),
         stopNames = Array.from(stops.values());
@@ -280,6 +297,7 @@ export class AppComponent {
     this.adjacencyMatrix = adjacencyMatrix;
   }
 
+  //Perform a depth first traversal of the previously constructed adjacency matrix
   private getPathDFS(stopA: string, stopB: string) {
     var source = stopA, 
         dest = stopB,
@@ -311,16 +329,19 @@ export class AppComponent {
     return false;
   }
 
+  // We have the stop IDs and want to display their names to the user. This method helps with that conversion.
   private getStopIdByName(stops: Map<string, string>, stop_name: string) {
     for (let stop_id of Array.from(stops.keys())) {
       if (stops.get(stop_id) === stop_name) return stop_id;
     }
   }
 
+  //Set filters for the getRoutes HTTP GET call
   private setRouteFilters(routeFilters: Map<any, any>) {
     this.routeFilters = routeFilters;
   }
 
+  //Set filters for the getStops HTTP GET call
   private setStopFilters(stopFilters: Map<any, any>) {
     this.stopFilters = stopFilters;
   }
