@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
+  styleUrls: [ './app.component.css' ],
   providers: [AppService]
 })
 export class AppComponent {
@@ -11,6 +12,7 @@ export class AppComponent {
   routeFilters: Map<any, any>;
   stopFilters: Map<any, any>;
   subwayRoutes: Map<string, string>;
+  stops: Map<string, string>;
   routeToStopsDict: Map<any, any>;
   stopToRoutesDict: Map<any, []>;
   maxStopRoute: any;
@@ -23,37 +25,64 @@ export class AppComponent {
     this.stopFilters = new Map();
     this.routeToStopsDict = new Map();
     this.subwayRoutes = new Map();
+    this.stops = new Map();
     this.stopToRoutesDict = new Map();
     this.maxStopRoute = {};
     this.minStopRoute = {};
   }
 
   ngOnInit() {
-    // FOR PROBLEM 1; Filter the request only for subway routes, i.e. "Light Rail" (type 0) and “Heavy Rail” (type 1). 
-    // let routeFilters = new Map();
-    // routeFilters.set('type', [0,1]);
-    // this.setRouteFilters(routeFilters);
-    // this.getRoutes()
-    // .then((data) => {
-    //   console.log(data.values());
-    // });
+  }
 
-    // FOR PROBLEM 2; Filter the request for each of the aforementioned subway routes
+  // FOR PROBLEM 1; Filter the request only for subway routes, i.e. "Light Rail" (type 0) and “Heavy Rail” (type 1).
+  makeRouteRequest() {
+    let routeFilters = new Map();
+    routeFilters.set('type', [0,1]);
+    this.setRouteFilters(routeFilters);
+    this.getRoutes()
+    .then((data) => {
+      console.log(data.values());
+    });
+  }
+
+  // FOR PROBLEM 2; Filter the request for each of the aforementioned subway routes
+  getStopInfo() {
     if (this.subwayRoutes.size == 0) {
+      console.log("aaaaa");
       let routeFilters = new Map();
       routeFilters.set('type', [0,1]);
       this.setRouteFilters(routeFilters);
       return this.getRoutes()
         .then((data) => {
-          return this.findStopsForEachRoute(data)
+          this.findStopsForEachRoute(data)
         });
     }
     else {
-      return this.findStopsForEachRoute(this.subwayRoutes);
+      this.findStopsForEachRoute(this.subwayRoutes);
     }
+    setTimeout((data) => { 
+      console.log(this.maxStopRoute);
+      console.log(this.minStopRoute);
+      this.findRoutesForEachStop(this.subwayRoutes, this.routeToStopsDict);
+      this.findStopsWithMultipleRoutes();
+    }, 1000);
   }
 
-  getRoutes() {
+  // FOR PROBLEM 3; TODO
+  getRouteBetweenTwoStops() {
+    // if (this.subwayRoutes.size == 0) {
+    //   this.makeRouteRequest();
+    // }
+    if (this.routeToStopsDict.size == 0) {
+      this.getStopInfo();
+    }
+
+    setTimeout((data) => {
+      this.findRoutesBetweenTwoStops('Ashmont', 'Arlington');
+    }, 2000);
+  }
+
+  private getRoutes() {
       return this.appService.getRoutes(this.routeFilters)
       .then((data) => {
         for (let route of data) {
@@ -63,14 +92,15 @@ export class AppComponent {
       });
     }
 
-  getStops() {
+  private getStops() {
     return this.appService.getStops(this.stopFilters)
     .then((data) => {
-      let stop_ids = []
+      let stops = new Map();
       for (let stop of data) {
-        stop_ids.push(stop.id); 
+        stops.set(stop.id, stop.attributes.name);
+        this.stops.set(stop.id, stop.attributes.name);
       }
-      return stop_ids;
+      return Array.from(stops.keys());
     });
   }
 
@@ -101,14 +131,6 @@ export class AppComponent {
         this.routeToStopsDict.set(subwayRoute, data);
       });
     }
-    setTimeout((data) => { 
-        console.log(this.routeToStopsDict); 
-        console.log(this.maxStopRoute);
-        console.log(this.minStopRoute);
-        this.findRoutesForEachStop(this.subwayRoutes, this.routeToStopsDict);
-        this.findStopsWithMultipleRoutes();  
-        this.findRoutesBetweenTwoStops('place-davis', 'place-knncl');
-      }, 1000);
   }
 
   private findRoutesForEachStop(subwayRoutes: Map<string, string>, routeToStopsDict: Map<string, string>) {
@@ -130,7 +152,6 @@ export class AppComponent {
     this.stopToRoutesDict = stopToRoutesDict;
   }
 
-  //NEED NAMES NOT IDS
   private findStopsWithMultipleRoutes() {
     let stopToRoutesDict = this.stopToRoutesDict,
         stopsWithMultipleRoutesDict = [];
@@ -148,21 +169,34 @@ export class AppComponent {
 
   private findRoutesBetweenTwoStops(stopA: string, stopB: string) {
     let stopToRoutesDict = this.stopToRoutesDict,
-        routesBetweenAandB = [];
+        stops = this.stops,
+        stop_names = Array.from(stops.values()),
+        routesBetweenAandB = [],
+        indexOfA = stop_names.indexOf(stopA),
+        indexOfB = stop_names.indexOf(stopB);
 
-    if (!stopToRoutesDict.get(stopA) || !stopToRoutesDict.get(stopB)) {
+    if (indexOfA < 0 || indexOfB < 0) {
       console.log("not found");
       return routesBetweenAandB;
     }
-    
-    for (let routeA of stopToRoutesDict.get(stopA)) {
-      for (let routeB of stopToRoutesDict.get(stopB)) {
+
+    let stopAId = this.getStopIdByName(stops, stopA),
+        stopBId = this.getStopIdByName(stops, stopB);
+
+    for (let routeA of stopToRoutesDict.get(stopAId)) {
+      for (let routeB of stopToRoutesDict.get(stopBId)) {
         if (routeA === routeB) {
           routesBetweenAandB.push(routeA);
         }
       }
     }
     console.log(routesBetweenAandB);
+  }
+
+  private getStopIdByName(stops: Map<string, string>, stop_name: string) {
+    for (let stop_id of Array.from(stops.keys())) {
+      if (stops.get(stop_id) === stop_name) return stop_id;
+    }
   }
 
   private setRouteFilters(routeFilters: Map<any, any>) {

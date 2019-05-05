@@ -1,0 +1,13 @@
+.buttons {
+    display: flex;
+    justify-content: space-around;
+    background-color: #bfbfbf;
+}
+
+.btn {
+    padding: 2.5rem 6rem !important;
+  }
+
+  .header {
+    background-color: #bfbfbf;
+  }

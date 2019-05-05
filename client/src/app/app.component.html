@@ -1,16 +1,18 @@
 <!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center">
+<div class="header" style="text-align:center">
   <h1>
     Boston MBTA
   </h1>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
-
-<button type="button" class="btn">Question 1</button>
-<button type="button" class="btn btn-default">Question 2</button>
-<button type="button" class="btn btn-primary">Question 3</button>
+  <div class="buttons">
+    <button type="button" class="btn btn-success" (click)="makeRouteRequest()">Question 1</button>
+    <button type="button" class="btn btn-info" (click)="getStopInfo()">Question 2</button>
+    <button type="button" class="btn btn-primary" (click)="getRouteBetweenTwoStops()">Question 3</button>
+  </div>
 
 <router-outlet></router-outlet>
