@@ -251,12 +251,11 @@ export class AppComponent {
     }
     this.adjacencyMatrix = adjacencyMatrix;
     console.log(adjacencyMatrix);
-    console.log(this.adjacencyMatrix.get("Ashmont"));
-    this.getPathDFS("Ashmont", "Chinatown");
+    this.getPathDFS("Park Street", "Airport");
   }
 
   private getPathDFS(stopA: string, stopB: string) {
-    let source = stopA, 
+    var source = stopA, 
         dest = stopB,
         visitedSet = new Set(),
         path = new Set();
@@ -266,14 +265,6 @@ export class AppComponent {
   }
 
   private getPathDFSHelper(source: string, dest: string, visitedSet: Set<any>, path: Set<any>) {
-    console.log("source is");
-    console.log(source);
-
-    console.log("destination is");
-    console.log(dest);
-    console.log("path is");
-    console.log(path);
-    
     if (visitedSet.has(source)) {
       return false;
     }
@@ -286,6 +277,7 @@ export class AppComponent {
     for (let child of this.adjacencyMatrix.get(source)) {
       if (this.getPathDFSHelper(child.neighbor, dest, visitedSet, path)) {
         path.add(child.path);
+        return true;
       }
     }
     return false;
