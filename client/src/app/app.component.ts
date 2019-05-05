@@ -74,6 +74,8 @@ export class AppComponent {
 
   // FOR PROBLEM 2; Filter the request for each of the aforementioned subway routes
   getStopInfo() {
+    this.showSubwayRoutes = false;
+
     if (this.subwayRoutes.size == 0) {
       let routeFilters = new Map();
       routeFilters.set('type', [0,1]);
@@ -102,19 +104,42 @@ export class AppComponent {
     }, 1000);
   }
 
-  // FOR PROBLEM 3; TODO
-  getRouteBetweenTwoStops() {
-    // if (this.subwayRoutes.size == 0) {
-    //   this.makeRouteRequest();
-    // }
+  // FOR PROBLEM 3; If the first two buttons have been pressed, then no new rest calls needed here. Else we 
+  // will need to make GET calls to both the /stops and the /routes endpoint. This part of the problem computes an 
+  // adjacency list in the "constructAdjacencyMatrix() method. The adjacency matrix is then used to get a traveling path 
+  // from the source stop to the destination stop. I have used a Depth First Graph Search algorithm here."
+
+  getRouteBetweenTwoStops(from: string, to: string) {
+
+    this.showSubwayRoutes = false;
+    this.showStopsInfoFlag = false;
+
     if (this.routeToStopsDict.size == 0) {
       this.getStopInfo();
     }
-
     setTimeout((data) => {
-      //this.findDirectRoutesBetweenTwoStops('Ashmont', 'Arlington');
+      //Checking for invalid stop names
+      let stop_names = Array.from(this.stops.values());
+      if (stop_names.indexOf(from) < 0) {
+        this.answerDiv.nativeElement.innerHTML = '<textarea class="form-control" rows="15" type="text" placeholder="Invalid origin name" readonly>';
+        return;
+      }
+
+      if (stop_names.indexOf(to) < 0) {
+        this.answerDiv.nativeElement.innerHTML = '<textarea class="form-control" rows="15" type="text" placeholder="Invalid destination name" readonly>';
+        return;
+      }
+
       this.constructAdjacencyMatrix(this.stops);
+      let trip = this.getPathDFS(from, to);
+      this.showTheTripRoute(trip);
     }, 2000);
+  }
+
+  private showTheTripRoute(trip: any) {
+    let ans_str = 'Route list:\n' + trip[0];
+    ans_str += '\nCorresponding Stop list:\n' + trip[1];
+    this.answerDiv.nativeElement.innerHTML = '<textarea class="form-control" rows="15" type="text" placeholder="' + ans_str + '" readonly>';
   }
 
   private getRoutes() {
@@ -250,21 +275,20 @@ export class AppComponent {
       }
     }
     this.adjacencyMatrix = adjacencyMatrix;
-    console.log(adjacencyMatrix);
-    this.getPathDFS("Park Street", "Airport");
   }
 
   private getPathDFS(stopA: string, stopB: string) {
     var source = stopA, 
         dest = stopB,
         visitedSet = new Set(),
-        path = new Set();
+        routesPath = [],
+        stopsPath = [];
 
-    this.getPathDFSHelper(source, dest, visitedSet, path);
-    console.log(path);
+    this.getPathDFSHelper(source, dest, visitedSet, routesPath, stopsPath);
+    return [routesPath, stopsPath];
   }
 
-  private getPathDFSHelper(source: string, dest: string, visitedSet: Set<any>, path: Set<any>) {
+  private getPathDFSHelper(source: string, dest: string, visitedSet: Set<any>, routesPath: any, stopsPath: any) {
     if (visitedSet.has(source)) {
       return false;
     }
@@ -275,23 +299,13 @@ export class AppComponent {
     }
 
     for (let child of this.adjacencyMatrix.get(source)) {
-      if (this.getPathDFSHelper(child.neighbor, dest, visitedSet, path)) {
-        path.add(child.path);
+      if (this.getPathDFSHelper(child.neighbor, dest, visitedSet, routesPath, stopsPath)) {
+        routesPath.unshift(child.path);
+        stopsPath.unshift(child.neighbor);
         return true;
       }
     }
     return false;
-  }
-
-  private getSourceIndexInAdjacencyMatrix(source: string) {
-    let count = 0;
-    for (let stop of Array.from(this.adjacencyMatrix.keys())) {
-      if (stop === source) {
-        console.log(count);
-        return count;
-      }
-      count++;
-    }
   }
 
   private getStopIdByName(stops: Map<string, string>, stop_name: string) {
