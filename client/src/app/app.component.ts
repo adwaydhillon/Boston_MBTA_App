@@ -137,8 +137,11 @@ export class AppComponent {
   }
 
   private showTheTripRoute(trip: any) {
-    let ans_str = 'Route list:\n' + trip[0];
-    ans_str += '\nCorresponding Stop list:\n' + trip[1];
+    let ans_str = '';
+    for (let i = 0; i < trip[0].length; i++) {
+      ans_str += trip[0][i] + ' to ' + trip[1][i] + '\nthen ';
+    }
+    ans_str = ans_str.substring(0, ans_str.length - 6);
     this.answerDiv.nativeElement.innerHTML = '<textarea class="form-control" rows="15" type="text" placeholder="' + ans_str + '" readonly>';
   }
 
