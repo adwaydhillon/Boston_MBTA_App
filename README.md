@@ -1,4 +1,5 @@
 # Boston_MBTA_App
+Check out the [MBTA v3 API](https://api-v3.mbta.com/docs/swagger/index.html). This application makes calls to the /routes and /stops endpoints to achieve its functionality. 
 
 ## What you will need
 * [Node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/get-npm) installed.
