@@ -22,6 +22,8 @@ export class AppComponent {
   showSubwayRoutes: boolean;
   showStopsInfoFlag: boolean;
   @ViewChild('answerDiv') answerDiv: ElementRef;
+  @ViewChild('from') from: ElementRef;
+  @ViewChild('to') to: ElementRef;
   
 
   constructor(public appService: AppService) {
@@ -68,6 +70,10 @@ export class AppComponent {
     this.showStopsInfoFlag = true;
   }
 
+  // dummy() {
+  //   console.log(this.fromName);
+  // }
+
   // FOR PROBLEM 2; Filter the request for each of the aforementioned subway routes
   getStopInfo() {
     if (this.subwayRoutes.size == 0) {
@@ -108,7 +114,8 @@ export class AppComponent {
     }
 
     setTimeout((data) => {
-      this.findRoutesBetweenTwoStops('Ashmont', 'Arlington');
+      //this.findDirectRoutesBetweenTwoStops('Ashmont', 'Arlington');
+      this.constructAdjacencyMatrix(this.stops);
     }, 2000);
   }
 
@@ -196,7 +203,7 @@ export class AppComponent {
     this.stopsWithMultipleRoutesDict = stopsWithMultipleRoutesDict;
   }
 
-  private findRoutesBetweenTwoStops(stopA: string, stopB: string) {
+  private findDirectRoutesBetweenTwoStops(stopA: string, stopB: string) {
     let stopToRoutesDict = this.stopToRoutesDict,
         stops = this.stops,
         stop_names = Array.from(stops.values()),
@@ -215,11 +222,33 @@ export class AppComponent {
     for (let routeA of stopToRoutesDict.get(stopAId)) {
       for (let routeB of stopToRoutesDict.get(stopBId)) {
         if (routeA === routeB) {
-          routesBetweenAandB.push(routeA);
+          return routeA;
         }
       }
     }
-    console.log(routesBetweenAandB);
+    return null;
+  }
+
+  private constructAdjacencyMatrix(stops: Map<string, string>) {
+    let adjacencyMatrix = new Map<any, any>(),
+        stopNames = Array.from(stops.values());
+    for (let stopNameA of stopNames) {
+      for (let stopNameB of stopNames) {
+        let retObj = this.findDirectRoutesBetweenTwoStops(stopNameA, stopNameB);
+        if (retObj != null) {
+          if (adjacencyMatrix.has(stopNameA)) {
+            let neighborsOfA = adjacencyMatrix.get(stopNameA);
+            neighborsOfA.push({neighbor: stopNameB, path: retObj});
+            adjacencyMatrix.set(stopNameA, neighborsOfA);
+          } else {
+            let neighborsOfA = [];
+            neighborsOfA.push({neighbor: stopNameB, path: retObj});
+            adjacencyMatrix.set(stopNameA, neighborsOfA);
+          }
+        }
+      }
+    }
+    console.log(adjacencyMatrix);
   }
 
   private getStopIdByName(stops: Map<string, string>, stop_name: string) {

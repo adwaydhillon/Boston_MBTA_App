@@ -1,12 +1,12 @@
 .buttons {
-    padding-top: 10%;
+    padding-top: 7%;
     display: flex;
     justify-content: space-around;
     background-color: #bfbfbf;
 }
 
 .btn {
-    padding: 2.5rem 6rem !important;
+    padding: 2.5rem 10rem !important;
   }
 
 .header {
